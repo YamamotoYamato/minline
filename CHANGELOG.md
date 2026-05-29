@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1 - 2026-05-29
+
+### Fixed
+
+- Limited IME enabling on inventory-like handled screens to focused text fields, preventing inventory controls from being interrupted by an active Japanese IME.
+
 ## 0.1.0 - 2026-05-29
 
 ### Added

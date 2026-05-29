@@ -1,5 +1,6 @@
 package com.yamamotoyamato.minline.mixin;
 
+import com.yamamotoyamato.minline.ImeInputController;
 import com.yamamotoyamato.minline.WindowsImeComposition;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -18,6 +19,8 @@ public abstract class TextFieldWidgetMixin {
         if (!widget.isActive() || !widget.isFocused() || MinecraftClient.getInstance().currentScreen == null) {
             return;
         }
+
+        ImeInputController.textFieldFocused();
 
         String composition = WindowsImeComposition.get();
         if (composition.isEmpty()) {
