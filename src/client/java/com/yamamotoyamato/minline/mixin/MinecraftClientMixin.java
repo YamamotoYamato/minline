@@ -13,4 +13,9 @@ public abstract class MinecraftClientMixin {
     private void minline$updateImeState(CallbackInfo ci) {
         ImeInputController.update();
     }
+
+    @Inject(method = "onWindowFocusChanged", at = @At("TAIL"))
+    private void minline$reapplyImeStateOnFocus(boolean focused, CallbackInfo ci) {
+        ImeInputController.windowFocusChanged(focused);
+    }
 }

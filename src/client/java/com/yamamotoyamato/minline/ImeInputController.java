@@ -8,17 +8,62 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 
 public final class ImeInputController {
+    private static final int FOCUSED_TEXT_FIELD_GRACE_TICKS = 5;
+
     private static boolean enabled;
+    private static boolean forceNextUpdate;
+    private static int focusedTextFieldTicks;
+    private static boolean hadFocusedTextFieldBeforeBlur;
+    private static TextFieldWidget lastFocusedTextField;
 
     private ImeInputController() {
     }
 
     public static void update() {
-        setEnabled(shouldEnableIme(MinecraftClient.getInstance().currentScreen));
+        if (!MinecraftClient.getInstance().isWindowFocused()) {
+            return;
+        }
+
+        setEnabled(shouldEnableIme(MinecraftClient.getInstance().currentScreen), forceNextUpdate);
+        forceNextUpdate = false;
+
+        if (focusedTextFieldTicks > 0) {
+            focusedTextFieldTicks--;
+        }
     }
 
     public static void textFieldFocused() {
-        setEnabled(true);
+        focusedTextFieldTicks = FOCUSED_TEXT_FIELD_GRACE_TICKS;
+        setEnabled(true, true);
+    }
+
+    public static void textFieldFocused(TextFieldWidget textField) {
+        lastFocusedTextField = textField;
+        textFieldFocused();
+    }
+
+    public static void windowFocusChanged(boolean focused) {
+        if (focused) {
+            if (hadFocusedTextFieldBeforeBlur || isLastTextFieldStillFocused()) {
+                focusedTextFieldTicks = FOCUSED_TEXT_FIELD_GRACE_TICKS;
+                setEnabled(true, true);
+            }
+            forceNextUpdate = true;
+        } else {
+            hadFocusedTextFieldBeforeBlur = focusedTextFieldTicks > 0 || hasFocusedTextField(MinecraftClient.getInstance().currentScreen);
+            focusedTextFieldTicks = 0;
+            if (!hadFocusedTextFieldBeforeBlur) {
+                setEnabled(false, true);
+            }
+        }
+    }
+
+    private static boolean isLastTextFieldStillFocused() {
+        return lastFocusedTextField != null && lastFocusedTextField.isActive() && lastFocusedTextField.isFocused();
+    }
+
+    private static boolean hasFocusedTextField(Screen screen) {
+        return screen != null && hasFocusedTextField((ParentElement) screen);
     }
 
     private static boolean shouldEnableIme(Screen screen) {
@@ -27,7 +72,7 @@ public final class ImeInputController {
         }
 
         if (screen instanceof HandledScreen<?>) {
-            return hasFocusedTextField(screen);
+            return focusedTextFieldTicks > 0 || hasFocusedTextField((ParentElement) screen);
         }
 
         return true;
@@ -50,7 +95,11 @@ public final class ImeInputController {
 
     private static boolean hasFocusedTextField(Element element) {
         if (element instanceof TextFieldWidget textField) {
-            return textField.isActive() && textField.isFocused();
+            if (textField.isActive() && textField.isFocused()) {
+                lastFocusedTextField = textField;
+                return true;
+            }
+            return false;
         }
 
         if (element instanceof ParentElement parent) {
@@ -60,8 +109,8 @@ public final class ImeInputController {
         return false;
     }
 
-    private static void setEnabled(boolean nextEnabled) {
-        if (enabled == nextEnabled) {
+    private static void setEnabled(boolean nextEnabled, boolean force) {
+        if (!force && enabled == nextEnabled) {
             return;
         }
 

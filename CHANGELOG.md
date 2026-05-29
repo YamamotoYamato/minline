@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.2 - 2026-05-30
+
+### Fixed
+
+- Fixed IME restoration after returning to Minecraft while an inventory search field is focused.
+- Kept IME control paused while the Minecraft window is unfocused, preventing focused text field state from expiring in the background.
+
 ## 0.1.1 - 2026-05-29
 
 ### Fixed

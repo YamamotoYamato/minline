@@ -13,6 +13,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(TextFieldWidget.class)
 public abstract class TextFieldWidgetMixin {
+    @Inject(method = "setFocused", at = @At("TAIL"))
+    private void minline$updateImeOnFocus(boolean focused, CallbackInfo ci) {
+        TextFieldWidget widget = (TextFieldWidget) (Object) this;
+        if (focused && widget.isActive() && MinecraftClient.getInstance().currentScreen != null) {
+            ImeInputController.textFieldFocused(widget);
+        }
+    }
+
     @Inject(method = "renderWidget", at = @At("TAIL"))
     private void inlineJa$renderComposition(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         TextFieldWidget widget = (TextFieldWidget) (Object) this;
@@ -20,7 +28,7 @@ public abstract class TextFieldWidgetMixin {
             return;
         }
 
-        ImeInputController.textFieldFocused();
+        ImeInputController.textFieldFocused(widget);
 
         String composition = WindowsImeComposition.get();
         if (composition.isEmpty()) {
