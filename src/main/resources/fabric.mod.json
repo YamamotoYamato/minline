@@ -8,7 +8,7 @@
     "YamamotoYamato"
   ],
   "contact": {},
-  "license": "Unlicense",
+  "license": "MIT",
   "environment": "client",
   "entrypoints": {
     "client": [

@@ -38,7 +38,7 @@ The jar is generated in `build/libs/`.
 
 ## License
 
-This project is released under the Unlicense. See `LICENSE` for details.
+This project is released under the MIT License. See `LICENSE` for details.
 
 ## Changelog
 
