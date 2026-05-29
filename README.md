@@ -1,6 +1,6 @@
 # Minline
 
-[日本語版](README_JA.md)
+[日本語](README_JA.md)
 
 Minline is a Minecraft 1.21.11 Fabric client mod that improves Japanese input on Windows.
 

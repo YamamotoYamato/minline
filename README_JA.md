@@ -1,5 +1,7 @@
 # Minline
 
+[English](README.md)
+
 Minline は Minecraft 1.21.11 / Fabric 用のクライアント mod です。Windows での日本語入力を改善します。
 
 ## インストール
