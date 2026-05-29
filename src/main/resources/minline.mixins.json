@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "com.yamamotoyamato.minline.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "MinecraftClientMixin",
+    "ScreenMixin",
+    "TextFieldWidgetMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
