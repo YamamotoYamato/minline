@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.6 - 2026-05-31
+
+### Fixed
+
+- Switched IME back to direct input when the chat screen closes after sending or closing chat.
+- Limited Enter-related IME closing behavior to chat screen closure, avoiding unrelated text fields such as inventory search.
+
 ## 0.1.5 - 2026-05-31
 
 ### Added

@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Keyboard.class)
 public abstract class KeyboardMixin {
     @Inject(method = "onKey", at = @At("HEAD"))
-    private void minline$closeImeOnEscape(long window, int action, KeyInput input, CallbackInfo ci) {
+    private void minline$captureImeCloseKey(long window, int action, KeyInput input, CallbackInfo ci) {
         if (input.key() == GLFW.GLFW_KEY_ESCAPE && action == GLFW.GLFW_PRESS) {
             WindowsImeComposition.closeIme();
         }
