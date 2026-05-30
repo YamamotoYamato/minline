@@ -68,6 +68,10 @@ public final class WindowsImeComposition {
         }
 
         if (enabled) {
+            User32.INSTANCE.BringWindowToTop(hwnd);
+            User32.INSTANCE.SetForegroundWindow(hwnd);
+            User32.INSTANCE.SetActiveWindow(hwnd);
+            User32.INSTANCE.SetFocus(hwnd);
             Imm32.INSTANCE.ImmAssociateContextEx(hwnd, null, IACE_DEFAULT);
         } else {
             Imm32.INSTANCE.ImmAssociateContextEx(hwnd, null, IACE_IGNORENOCONTEXT);
@@ -98,5 +102,17 @@ public final class WindowsImeComposition {
         int ImmGetCompositionStringW(Pointer inputContext, int index, char[] buffer, int bufferLength);
 
         boolean ImmAssociateContextEx(WinUser.HWND hwnd, Pointer inputContext, int flags);
+    }
+
+    private interface User32 extends StdCallLibrary {
+        User32 INSTANCE = Native.load("user32", User32.class, W32APIOptions.DEFAULT_OPTIONS);
+
+        boolean BringWindowToTop(WinUser.HWND hwnd);
+
+        boolean SetForegroundWindow(WinUser.HWND hwnd);
+
+        WinUser.HWND SetActiveWindow(WinUser.HWND hwnd);
+
+        WinUser.HWND SetFocus(WinUser.HWND hwnd);
     }
 }

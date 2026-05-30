@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.3 - 2026-05-30
+
+### Fixed
+
+- Fixed IME restoration after returning from external applications while Minecraft is in fullscreen.
+- Reapplied Windows foreground and focus state before enabling IME for the Minecraft window.
+
 ## 0.1.2 - 2026-05-30
 
 ### Fixed

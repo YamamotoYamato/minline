@@ -8,7 +8,7 @@ Minline is a Minecraft 1.21.11 Fabric client mod that improves Japanese input on
 
 1. Download the latest jar from [Releases](https://github.com/YamamotoYamato/minline/releases).
 2. Install Fabric Loader for Minecraft 1.21.11.
-3. Put the downloaded `minline-0.1.2.jar` into your Minecraft `mods` folder.
+3. Put the downloaded `minline-0.1.3.jar` into your Minecraft `mods` folder.
 4. Start Minecraft with the Fabric profile.
 
 ## Usage

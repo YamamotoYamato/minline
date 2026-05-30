@@ -8,7 +8,7 @@ Minline は Minecraft 1.21.11 / Fabric 用のクライアント mod です。Win
 
 1. [Releases](https://github.com/YamamotoYamato/minline/releases) から最新の jar をダウンロードします。
 2. Minecraft 1.21.11 用の Fabric Loader をインストールします。
-3. ダウンロードした `minline-0.1.2.jar` を Minecraft の `mods` フォルダに入れます。
+3. ダウンロードした `minline-0.1.3.jar` を Minecraft の `mods` フォルダに入れます。
 4. Fabric プロファイルで Minecraft を起動します。
 
 ## 使い方

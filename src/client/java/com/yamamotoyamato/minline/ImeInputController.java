@@ -20,11 +20,12 @@ public final class ImeInputController {
     }
 
     public static void update() {
-        if (!MinecraftClient.getInstance().isWindowFocused()) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (!client.isWindowFocused()) {
             return;
         }
 
-        setEnabled(shouldEnableIme(MinecraftClient.getInstance().currentScreen), forceNextUpdate);
+        setEnabled(shouldEnableIme(client.currentScreen), forceNextUpdate);
         forceNextUpdate = false;
 
         if (focusedTextFieldTicks > 0) {
