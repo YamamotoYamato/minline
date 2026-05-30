@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.4 - 2026-05-31
+
+### Changed
+
+- Removed automatic Windows IME context enable/disable handling.
+- Limited the mod scope to inline rendering of Windows IME composition text.
+
+### Fixed
+
+- Suppressed the default Windows IME composition window while Minline renders inline composition text.
+- Fixed inline composition position in non-chat text fields.
+
 ## 0.1.3 - 2026-05-30
 
 ### Fixed

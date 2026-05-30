@@ -1,6 +1,5 @@
 package com.yamamotoyamato.minline.mixin;
 
-import com.yamamotoyamato.minline.ImeInputController;
 import com.yamamotoyamato.minline.WindowsImeComposition;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -13,14 +12,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(TextFieldWidget.class)
 public abstract class TextFieldWidgetMixin {
-    @Inject(method = "setFocused", at = @At("TAIL"))
-    private void minline$updateImeOnFocus(boolean focused, CallbackInfo ci) {
-        TextFieldWidget widget = (TextFieldWidget) (Object) this;
-        if (focused && widget.isActive() && MinecraftClient.getInstance().currentScreen != null) {
-            ImeInputController.textFieldFocused(widget);
-        }
-    }
-
     @Inject(method = "renderWidget", at = @At("TAIL"))
     private void inlineJa$renderComposition(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         TextFieldWidget widget = (TextFieldWidget) (Object) this;
@@ -28,18 +19,23 @@ public abstract class TextFieldWidgetMixin {
             return;
         }
 
-        ImeInputController.textFieldFocused(widget);
+        TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
+        TextFieldWidgetAccessor accessor = (TextFieldWidgetAccessor) widget;
+        int firstCharacterIndex = accessor.minline$getFirstCharacterIndex();
+        int cursor = widget.getCursor();
+        int x = accessor.minline$getTextX();
+        if (cursor > firstCharacterIndex) {
+            x += textRenderer.getWidth(widget.getText().substring(firstCharacterIndex, cursor));
+        }
+        int y = accessor.minline$getTextY();
+        WindowsImeComposition.moveCompositionWindow(x, y + textRenderer.fontHeight);
 
         String composition = WindowsImeComposition.get();
         if (composition.isEmpty()) {
             return;
         }
 
-        TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
-        int x = widget.getCharacterX(widget.getCursor());
-        int y = widget.getY() + (widget.getHeight() - textRenderer.fontHeight) / 2 - 1;
-
-        int maxWidth = Math.max(0, widget.getX() + 4 + widget.getInnerWidth() - x);
+        int maxWidth = Math.max(0, accessor.minline$getTextX() + widget.getInnerWidth() - x);
         String visibleComposition = textRenderer.trimToWidth(composition, maxWidth);
         if (visibleComposition.isEmpty()) {
             return;

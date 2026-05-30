@@ -2,28 +2,26 @@
 
 [English](README.md)
 
-Minline は Minecraft 1.21.11 / Fabric 用のクライアント mod です。Windows での日本語入力を改善します。
+Minline は Minecraft 1.21.11 / Fabric 用のクライアント mod です。Windows IME の未確定文字列を Minecraft のテキスト入力欄にインライン表示します。
 
 ## インストール
 
 1. [Releases](https://github.com/YamamotoYamato/minline/releases) から最新の jar をダウンロードします。
 2. Minecraft 1.21.11 用の Fabric Loader をインストールします。
-3. ダウンロードした `minline-0.1.3.jar` を Minecraft の `mods` フォルダに入れます。
+3. ダウンロードした `minline-0.1.4.jar` を Minecraft の `mods` フォルダに入れます。
 4. Fabric プロファイルで Minecraft を起動します。
 
 ## 使い方
 
 チャット欄などのテキスト入力欄で Windows IME を使って日本語を入力します。変換中の未確定文字列が、カーソル位置に下線つきで表示されます。確定済み文字の入力処理は Minecraft / GLFW 標準の挙動を使います。
 
-ゲーム操作中は、Minecraft ウィンドウから Windows IME のコンテキストを外します。これにより、日本語 IME が有効なままでも移動などの操作キーが IME に奪われにくくなります。チャットなどの Minecraft 画面を開いている間は、既定の IME コンテキストを戻します。
-
-インベントリ系の画面では、テキスト入力欄にフォーカスしている間だけ IME を有効化するため、通常のインベントリ操作を妨げにくくなっています。
+Minline は IME のオン / オフ状態を変更しません。IME の切り替えは、通常どおりキーボードや OS の設定で行ってください。
 
 ## 注意
 
 - クライアント専用 mod です。
 - Fabric API には依存しません。
-- IME 未確定文字列のインライン表示と、操作キー保護は現在 Windows 専用です。
+- IME 未確定文字列のインライン表示は現在 Windows 専用です。
 - Windows 以外では mod は読み込まれますが、IME 未確定文字列は表示されません。
 
 ## ビルド
