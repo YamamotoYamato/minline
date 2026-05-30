@@ -1,5 +1,6 @@
 package com.yamamotoyamato.minline;
 
+import com.sun.jna.Memory;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
@@ -18,15 +19,22 @@ import net.minecraft.client.util.Window;
 import org.lwjgl.glfw.GLFWNativeWin32;
 import org.lwjgl.system.Platform;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public final class WindowsImeComposition {
     private static final int GCS_COMPSTR = 0x0008;
     private static final int GCS_RESULTSTR = 0x0800;
+    private static final int CANDIDATE_LIST_INDEX = 0;
     private static final int CFS_FORCE_POSITION = 0x0020;
     private static final int GWLP_WNDPROC = -4;
     private static final int WM_IME_STARTCOMPOSITION = 0x010D;
     private static final int WM_IME_COMPOSITION = 0x010F;
+    private static final int WM_IME_NOTIFY = 0x0282;
+    private static final int IMN_CHANGECANDIDATE = 0x0003;
+    private static final int IMN_OPENCANDIDATE = 0x0005;
+    private static final int VK_IME_OFF = 0x1A;
+    private static final int KEYEVENTF_KEYUP = 0x0002;
     private static final long INLINE_INPUT_ACTIVE_NANOS = 500_000_000L;
     private static volatile boolean available;
     private static volatile long inlineInputActiveUntil;
@@ -39,6 +47,30 @@ public final class WindowsImeComposition {
 
     public static void initialize() {
         available = Platform.get() == Platform.WINDOWS;
+    }
+
+    public static void closeIme() {
+        if (!available) {
+            return;
+        }
+
+        HWND hwnd = getWindowHandle();
+        if (hwnd == null) {
+            return;
+        }
+
+        Pointer context = Imm32.INSTANCE.ImmGetContext(hwnd);
+        if (context == null || Pointer.nativeValue(context) == 0L) {
+            return;
+        }
+
+        try {
+            Imm32.INSTANCE.ImmSetOpenStatus(context, false);
+        } finally {
+            Imm32.INSTANCE.ImmReleaseContext(hwnd, context);
+        }
+        User32.INSTANCE.keybd_event((byte) VK_IME_OFF, (byte) 0, 0, Pointer.NULL);
+        User32.INSTANCE.keybd_event((byte) VK_IME_OFF, (byte) 0, KEYEVENTF_KEYUP, Pointer.NULL);
     }
 
     public static void moveCompositionWindow(int guiX, int guiY) {
@@ -99,6 +131,11 @@ public final class WindowsImeComposition {
             return new LRESULT(0);
         }
 
+        if (isInlineInputActive() && message == WM_IME_NOTIFY
+                && (wParam.intValue() == IMN_OPENCANDIDATE || wParam.intValue() == IMN_CHANGECANDIDATE)) {
+            return new LRESULT(0);
+        }
+
         if (previousWndProc == null || previousWndProc.longValue() == 0L) {
             return User32.INSTANCE.DefWindowProc(hwnd, message, wParam, lParam);
         }
@@ -139,6 +176,57 @@ public final class WindowsImeComposition {
         }
     }
 
+    public static Candidates getCandidates() {
+        if (!available) {
+            return Candidates.EMPTY;
+        }
+
+        HWND hwnd = getWindowHandle();
+        if (hwnd == null) {
+            return Candidates.EMPTY;
+        }
+
+        Pointer context = Imm32.INSTANCE.ImmGetContext(hwnd);
+        if (context == null || Pointer.nativeValue(context) == 0L) {
+            return Candidates.EMPTY;
+        }
+
+        try {
+            int byteLength = Imm32.INSTANCE.ImmGetCandidateListW(context, CANDIDATE_LIST_INDEX, null, 0);
+            if (byteLength <= 0) {
+                return Candidates.EMPTY;
+            }
+
+            Memory memory = new Memory(byteLength);
+            int copied = Imm32.INSTANCE.ImmGetCandidateListW(context, CANDIDATE_LIST_INDEX, memory, byteLength);
+            if (copied <= 0) {
+                return Candidates.EMPTY;
+            }
+
+            int count = memory.getInt(8);
+            int selection = memory.getInt(12);
+            int pageStart = memory.getInt(16);
+            int pageSize = memory.getInt(20);
+            List<String> values = new ArrayList<>();
+            for (int i = 0; i < count; i++) {
+                long offset = Integer.toUnsignedLong(memory.getInt(24L + (long) i * Integer.BYTES));
+                if (offset > 0 && offset < byteLength) {
+                    String value = memory.getWideString(offset);
+                    if (!value.isEmpty()) {
+                        values.add(value);
+                    }
+                }
+            }
+
+            if (values.isEmpty()) {
+                return Candidates.EMPTY;
+            }
+            return new Candidates(List.copyOf(values), selection, pageStart, pageSize);
+        } finally {
+            Imm32.INSTANCE.ImmReleaseContext(hwnd, context);
+        }
+    }
+
     private static HWND getWindowHandle() {
         long window = MinecraftClient.getInstance().getWindow().getHandle();
         if (window == 0L) {
@@ -163,6 +251,10 @@ public final class WindowsImeComposition {
         int ImmGetCompositionStringW(Pointer inputContext, int index, char[] buffer, int bufferLength);
 
         boolean ImmSetCompositionWindow(Pointer inputContext, CompositionForm compositionForm);
+
+        int ImmGetCandidateListW(Pointer inputContext, int candidateListIndex, Pointer candidateList, int bufferLength);
+
+        boolean ImmSetOpenStatus(Pointer inputContext, boolean open);
     }
 
     private interface User32 extends StdCallLibrary {
@@ -173,6 +265,8 @@ public final class WindowsImeComposition {
         LRESULT CallWindowProc(LONG_PTR previousWndProc, HWND hwnd, int message, WPARAM wParam, LPARAM lParam);
 
         LRESULT DefWindowProc(HWND hwnd, int message, WPARAM wParam, LPARAM lParam);
+
+        void keybd_event(byte virtualKey, byte scanCode, int flags, Pointer extraInfo);
     }
 
     public static class CompositionForm extends Structure {
@@ -183,6 +277,14 @@ public final class WindowsImeComposition {
         @Override
         protected List<String> getFieldOrder() {
             return List.of("dwStyle", "ptCurrentPos", "rcArea");
+        }
+    }
+
+    public record Candidates(List<String> values, int selection, int pageStart, int pageSize) {
+        private static final Candidates EMPTY = new Candidates(List.of(), 0, 0, 0);
+
+        public boolean isEmpty() {
+            return values.isEmpty();
         }
     }
 }

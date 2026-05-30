@@ -8,12 +8,14 @@ Minline は Minecraft 1.21.11 / Fabric 用のクライアント mod です。Win
 
 1. [Releases](https://github.com/YamamotoYamato/minline/releases) から最新の jar をダウンロードします。
 2. Minecraft 1.21.11 用の Fabric Loader をインストールします。
-3. ダウンロードした `minline-0.1.4.jar` を Minecraft の `mods` フォルダに入れます。
+3. ダウンロードした `minline-0.1.5.jar` を Minecraft の `mods` フォルダに入れます。
 4. Fabric プロファイルで Minecraft を起動します。
 
 ## 使い方
 
 チャット欄などのテキスト入力欄で Windows IME を使って日本語を入力します。変換中の未確定文字列が、カーソル位置に下線つきで表示されます。確定済み文字の入力処理は Minecraft / GLFW 標準の挙動を使います。
+
+候補が取得できる場合は、テキスト入力欄の近くに簡易候補一覧を表示します。`Esc` を押すと画面を閉じると同時に、Windows に IME を直接入力へ戻すよう要求します。
 
 Minline は IME のオン / オフ状態を変更しません。IME の切り替えは、通常どおりキーボードや OS の設定で行ってください。
 

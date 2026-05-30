@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.5 - 2026-05-31
+
+### Added
+
+- Added a simple in-game candidate list for Windows IME conversion candidates.
+- Added `Esc` handling that asks Windows to switch IME back to direct input.
+
+### Fixed
+
+- Flipped the candidate list above the text field when there is not enough room below it.
+
 ## 0.1.4 - 2026-05-31
 
 ### Changed
