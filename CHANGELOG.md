@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.7 - 2026-05-31
+
+### Fixed
+
+- Switched IME back to direct input when the normal game view is active and IME is still open.
+- Kept IME available while Minecraft screens such as chat and inventory search are open.
+
 ## 0.1.6 - 2026-05-31
 
 ### Fixed

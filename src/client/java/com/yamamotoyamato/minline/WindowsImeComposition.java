@@ -73,6 +73,28 @@ public final class WindowsImeComposition {
         User32.INSTANCE.keybd_event((byte) VK_IME_OFF, (byte) 0, KEYEVENTF_KEYUP, Pointer.NULL);
     }
 
+    public static boolean isImeOpen() {
+        if (!available) {
+            return false;
+        }
+
+        HWND hwnd = getWindowHandle();
+        if (hwnd == null) {
+            return false;
+        }
+
+        Pointer context = Imm32.INSTANCE.ImmGetContext(hwnd);
+        if (context == null || Pointer.nativeValue(context) == 0L) {
+            return false;
+        }
+
+        try {
+            return Imm32.INSTANCE.ImmGetOpenStatus(context);
+        } finally {
+            Imm32.INSTANCE.ImmReleaseContext(hwnd, context);
+        }
+    }
+
     public static void moveCompositionWindow(int guiX, int guiY) {
         if (!available) {
             return;
@@ -255,6 +277,8 @@ public final class WindowsImeComposition {
         int ImmGetCandidateListW(Pointer inputContext, int candidateListIndex, Pointer candidateList, int bufferLength);
 
         boolean ImmSetOpenStatus(Pointer inputContext, boolean open);
+
+        boolean ImmGetOpenStatus(Pointer inputContext);
     }
 
     private interface User32 extends StdCallLibrary {
