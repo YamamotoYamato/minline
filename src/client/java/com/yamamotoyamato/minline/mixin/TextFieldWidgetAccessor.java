@@ -14,4 +14,16 @@ public interface TextFieldWidgetAccessor {
 
     @Accessor("firstCharacterIndex")
     int minline$getFirstCharacterIndex();
+
+    /** テキストフィールドの描画用文字列を設定する */
+    @Accessor("text")
+    void minline$setText(String text);
+
+    /** テキストフィールドの選択開始位置を設定する */
+    @Accessor("selectionStart")
+    void minline$setSelectionStart(int selectionStart);
+
+    /** テキストフィールドの選択終了位置を設定する */
+    @Accessor("selectionEnd")
+    void minline$setSelectionEnd(int selectionEnd);
 }

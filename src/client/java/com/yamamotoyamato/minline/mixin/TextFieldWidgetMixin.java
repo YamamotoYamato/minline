@@ -12,15 +12,38 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(TextFieldWidget.class)
 public abstract class TextFieldWidgetMixin {
+    private String minline$originalText;
+
+    @Inject(method = "renderWidget", at = @At("HEAD"))
+    private void minline$hideSuffixForRender(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+        TextFieldWidget widget = (TextFieldWidget) (Object) this;
+        String composition = WindowsImeComposition.get();
+        int cursor = widget.getCursor();
+        if (!widget.isActive() || !widget.isFocused() || composition.isEmpty() || cursor >= widget.getText().length()) {
+            return;
+        }
+
+        TextFieldWidgetAccessor accessor = (TextFieldWidgetAccessor) widget;
+        minline$originalText = widget.getText();
+        accessor.minline$setText(minline$originalText.substring(0, cursor));
+        accessor.minline$setSelectionStart(cursor);
+        accessor.minline$setSelectionEnd(cursor);
+    }
+
     @Inject(method = "renderWidget", at = @At("TAIL"))
     private void inlineJa$renderComposition(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         TextFieldWidget widget = (TextFieldWidget) (Object) this;
+        TextFieldWidgetAccessor accessor = (TextFieldWidgetAccessor) widget;
+        String renderedText = minline$originalText;
+        if (renderedText != null) {
+            accessor.minline$setText(renderedText);
+            minline$originalText = null;
+        }
         if (!widget.isActive() || !widget.isFocused() || MinecraftClient.getInstance().currentScreen == null) {
             return;
         }
 
         TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
-        TextFieldWidgetAccessor accessor = (TextFieldWidgetAccessor) widget;
         int firstCharacterIndex = accessor.minline$getFirstCharacterIndex();
         int cursor = widget.getCursor();
         int x = accessor.minline$getTextX();
@@ -39,9 +62,15 @@ public abstract class TextFieldWidgetMixin {
         int maxWidth = Math.max(0, accessor.minline$getTextX() + widget.getInnerWidth() - x);
         String visibleComposition = textRenderer.trimToWidth(composition, maxWidth);
         if (!visibleComposition.isEmpty()) {
+            int compositionWidth = textRenderer.getWidth(visibleComposition);
+            String suffix = widget.getText().substring(Math.min(cursor, widget.getText().length()));
+            String visibleSuffix = textRenderer.trimToWidth(suffix, Math.max(0, maxWidth - compositionWidth));
             context.drawText(textRenderer, visibleComposition, x, y, 0xFFE6D45A, false);
             int underlineY = y + textRenderer.fontHeight;
-            context.fill(x, underlineY, x + textRenderer.getWidth(visibleComposition), underlineY + 1, 0xFFE6D45A);
+            context.fill(x, underlineY, x + compositionWidth, underlineY + 1, 0xFFE6D45A);
+            if (!visibleSuffix.isEmpty()) {
+                context.drawText(textRenderer, visibleSuffix, x + compositionWidth, y, 0xFFFFFFFF, false);
+            }
         }
 
         if (!candidates.isEmpty()) {
