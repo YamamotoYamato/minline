@@ -305,7 +305,7 @@ public final class WindowsImeComposition {
     }
 
     public record Candidates(List<String> values, int selection, int pageStart, int pageSize) {
-        private static final Candidates EMPTY = new Candidates(List.of(), 0, 0, 0);
+        public static final Candidates EMPTY = new Candidates(List.of(), 0, 0, 0);
 
         public boolean isEmpty() {
             return values.isEmpty();
